@@ -1,0 +1,979 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>图解微积分｜第一编：函数、极限、导数与积分</title>
+<style>
+:root{
+  --ink:#22211f;--muted:#716d66;--paper:#fffdf8;--paper2:#f7f3ea;
+  --red:#d85d4b;--blue:#397ea3;--gold:#d2a33f;--green:#558a68;
+  --line:#ddd7cc;--desk:#e8e3da;--shadow:0 14px 40px #4f473c1c;
+  --serif:"Noto Serif SC","Source Han Serif SC","Songti SC","STSong",serif;
+  --sans:"Noto Sans SC","Source Han Sans SC","Microsoft YaHei",system-ui,sans-serif;
+  --math:"STIX Two Math","Cambria Math","Latin Modern Math","Times New Roman",serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;color:var(--ink);
+  font-family:var(--sans);
+  background:#e9e5de;
+}
+button,input{font:inherit}
+.progress{position:fixed;z-index:20;left:0;top:0;height:4px;width:0;background:var(--red)}
+.rail{
+  position:fixed;z-index:10;left:22px;top:50%;transform:translateY(-50%);
+  display:grid;gap:10px;font:12px/1.2 system-ui,sans-serif;color:#504a42;
+}
+.rail a{width:10px;height:10px;border:1px solid currentColor;border-radius:50%;background:#f7f0e4;text-indent:18px;white-space:nowrap;text-decoration:none;color:inherit}
+.rail a:hover,.rail a.on{background:var(--red);border-color:var(--red)}
+.book{width:min(100% - 32px,1020px);margin:32px auto 90px;counter-reset:folio}
+.page{
+  counter-increment:folio;
+  position:relative;min-height:720px;margin:0 0 28px;padding:70px 90px 82px;
+  background:var(--paper);border:1px solid #d8d1c5;border-radius:4px;
+  box-shadow:var(--shadow);overflow:hidden;
+}
+.page:after{content:"";position:absolute;left:0;top:0;bottom:0;width:7px;pointer-events:none;background:linear-gradient(90deg,#806f5914,transparent)}
+.folio{position:absolute;bottom:25px;left:50%;transform:translateX(-50%);font-size:0;color:#897e70}
+.folio:before{content:counter(folio);font:12px Georgia,serif}
+.running{font:11px/1 var(--sans);letter-spacing:.13em;color:#8c8275;border-bottom:1px solid var(--line);padding-bottom:11px;margin-bottom:30px}
+h1,h2,h3,p{margin-top:0}
+h1,h2,h3{font-family:var(--serif);font-weight:700}
+h1{font-size:clamp(40px,5.8vw,66px);line-height:1.08;letter-spacing:-.035em;margin-bottom:28px}
+h2{font-size:clamp(27px,3.4vw,36px);line-height:1.28;letter-spacing:-.018em;margin-bottom:22px;max-width:19em}
+h3{font-size:20px;margin-bottom:10px}
+p{font-size:17px;line-height:1.78;margin-bottom:13px}
+.page>p{max-width:43em}
+.lead{font-size:20px;line-height:1.72;max-width:32em}
+.kicker{font:700 12px/1.2 var(--sans);letter-spacing:.15em;color:var(--red);margin-bottom:18px}
+.note{color:var(--muted);font-size:15px}
+.formula{font-family:var(--math);font-size:clamp(21px,2.8vw,31px);line-height:1.55;text-align:center;margin:23px auto;letter-spacing:.005em;font-variant-numeric:lining-nums tabular-nums;overflow-x:auto;overflow-y:hidden;padding-bottom:2px}
+.formula sup,.formula sub{font-size:.64em;line-height:0}
+.frac{display:inline-grid;grid-template-rows:auto auto;vertical-align:middle;line-height:1.08;text-align:center;margin:0 .12em}
+.frac>span:first-child{padding:0 .18em .08em;border-bottom:1.4px solid currentColor}
+.frac>span:last-child{padding:.08em .18em 0}
+.math-inline{font-family:var(--math);white-space:nowrap}
+.accent{color:var(--red)}.blue{color:var(--blue)}.green{color:var(--green)}
+.cover{min-height:790px;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(145deg,#fffdf8,#fffdf8 60%,#f1e7d7)}
+.cover:before{content:"";position:absolute;width:300px;height:300px;right:-105px;top:-105px;border:1px solid #d85d4b88;border-radius:50%;box-shadow:0 0 0 28px #d85d4b0b}
+.cover-mark{width:110px;height:9px;background:var(--red);margin-bottom:32px}
+.toc{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:42px}
+.toc a{padding:18px;border-top:3px solid var(--ink);color:inherit;text-decoration:none;font-size:15px;line-height:1.5}
+.hero-number{position:absolute;right:55px;bottom:30px;font:190px/.8 var(--math);color:#d8c9ae55}
+.art{margin:26px auto 20px;width:100%;border-radius:8px;background:#faf7f0;border:1px solid #e5dfd4;overflow:hidden}
+.art svg{display:block;width:100%;height:auto}
+.art svg text{font-family:var(--sans)}
+.caption{font-size:15px;line-height:1.65;color:var(--muted);text-align:center;margin-top:-8px}
+.spread{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center}
+.strip{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0}
+.mini{padding:16px;background:#faf7f0;border:1px solid var(--line);border-radius:7px}
+.mini b{font:700 13px var(--sans);color:var(--red)}
+.mini .formula{font-size:clamp(19px,2.2vw,27px);margin:14px auto}
+.quote{border-left:3px solid var(--red);padding:5px 0 5px 20px;margin:27px 0;font-size:19px;line-height:1.66}
+.definition{padding:23px 27px;background:#f5f1e8;color:var(--ink);border-left:4px solid var(--blue);border-radius:2px;margin-top:23px}
+.definition .formula{color:#245f82;margin:9px 0}.definition p{font-size:16.5px;margin:0}
+.lab{background:#f7f3ea;border:1px solid #ddd4c5;border-radius:9px;padding:22px;margin:22px 0}
+.lab-grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(240px,.6fr);gap:22px;align-items:center}
+canvas{display:block;width:100%;height:350px;background:#fffdf8;border-radius:6px;border:1px solid #e0d8ca}
+.controls{display:grid;gap:18px}
+.control label{display:flex;justify-content:space-between;font:700 14px system-ui,sans-serif;margin-bottom:8px}
+input[type=range]{width:100%;accent-color:var(--red)}
+.pill{display:inline-block;padding:7px 11px;border-radius:99px;font:700 13px var(--sans);background:#fffdf8;border:1px solid var(--line)}
+.status{padding:14px;border-radius:6px;font:700 14px/1.5 var(--sans);background:#fffdf8}
+.status.good{color:#27603c;border:1px solid #8eb59b;background:#edf6ed}.status.bad{color:#853b31;border:1px solid #d8a097;background:#fff0ec}
+.action{border:0;border-radius:999px;padding:11px 16px;background:var(--ink);color:white;cursor:pointer}
+.action:hover{background:var(--red)}
+.exercise{background:#fffdf8;border:1px solid #cfc7ba;border-radius:8px;padding:24px;margin-top:26px;box-shadow:none}
+.exercise .eyebrow{font:700 12px var(--sans);letter-spacing:.12em;color:var(--red)}
+.choice{display:block;width:100%;text-align:left;padding:13px 15px;margin:8px 0;border:1px solid var(--line);background:white;border-radius:6px;cursor:pointer;color:inherit;font-size:16px}
+.choice:hover{border-color:var(--blue)}.choice.correct{background:#e9f4ea;border-color:var(--green)}.choice.wrong{background:#fff0ec;border-color:var(--red)}
+.feedback{min-height:28px;margin-top:12px;font-size:16px;color:var(--muted)}
+.chapter{background:#292824;color:#fff9ed;min-height:750px;display:flex;flex-direction:column;justify-content:center}
+.chapter .running{color:#a9a093;border-color:#5f5a52}.chapter h2{font-size:clamp(40px,5.8vw,58px);max-width:10em}.chapter p{color:#d9cdbb}.chapter .hero-number{color:#ffffff10}
+.summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:30px}
+.summary-card{padding:21px;border-top:3px solid var(--red);background:#faf7f0}
+.summary-card p{font-size:16px;margin:0}
+.flow{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin:30px 0}
+.flow .box{min-width:145px;padding:16px 20px;border:1px solid var(--line);border-radius:7px;background:#fffdf8;text-align:center;font-size:17px}
+.flow .arrow{font:28px Georgia,serif;color:var(--red)}
+.history{margin:27px 0;padding:20px 24px;border-left:3px solid var(--gold);background:#faf5e9}
+.history p{font-size:16px;margin:0}
+.bridge{margin-top:34px;padding-top:22px;border-top:1px solid var(--line);font-size:20px}
+.checklist{display:grid;gap:12px;margin:24px 0}
+.checklist div{padding:15px 18px;border-left:4px solid var(--blue);background:#f2eadc;font-size:17px}
+.end{min-height:620px;display:flex;flex-direction:column;justify-content:center;text-align:center}
+@media(max-width:820px){
+ .rail{display:none}.book{width:min(100% - 18px,700px);margin-top:10px}.page{padding:48px 28px 66px;min-height:auto}
+ .spread,.lab-grid{grid-template-columns:1fr}.toc,.strip,.summary-grid{grid-template-columns:1fr}
+ canvas{height:300px}.cover{min-height:720px}.hero-number{font-size:140px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<nav class="rail" aria-label="章节导航">
+ <a href="#cover" title="封面">封面</a>
+ <a href="#functions" title="函数">函数</a>
+ <a href="#sequence" title="极限">极限</a>
+ <a href="#derivative" title="导数">导数</a>
+ <a href="#integral" title="积分">积分</a>
+ <a href="#book-summary" title="全书小结">小结</a>
+</nav>
+<main class="book">
+
+<section class="page cover" id="cover">
+ <div class="cover-mark"></div><div class="kicker">图解微积分 · 第一编</div>
+ <h1>从函数开始，<br>看见<span class="accent">变化</span><br>怎样发生</h1>
+ <p class="lead">函数描述关系，极限描述靠近，导数描述瞬时变化，积分把细小变化重新累积起来。</p>
+ <div class="toc">
+  <a href="#functions">01<br><b>函数与极限</b></a>
+  <a href="#derivative">02<br><b>导数与变化率</b></a>
+  <a href="#integral">03<br><b>积分与累积</b></a>
+  <a href="#book-summary">04<br><b>把两条主线接起来</b></a>
+ </div>
+ <div class="hero-number">∞</div><div class="folio">1</div>
+</section>
+
+<section class="page chapter" id="functions">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">第一节 · 函数</div>
+ <h2>一个量变化，另一个量怎样跟着变化？</h2>
+ <p class="lead">微积分研究变化。在讨论“变化得多快”之前，我们先要说清楚：两个量之间究竟是什么关系。</p>
+ <div class="hero-number">f</div><div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">先从一个具体关系开始</div>
+ <h2>边长确定以后，面积也就确定了</h2>
+ <div class="spread">
+  <div><p>正方形边长记作 x，面积记作 S。</p><div class="formula">S=x²</div><p>输入一个边长，就能得到唯一的面积。</p><div class="flow"><div class="box">输入 x=3</div><div class="arrow">→</div><div class="box">输出 S=9</div></div></div>
+  <div class="art"><svg viewBox="0 0 520 470" role="img" aria-label="边长为x的正方形面积为x平方"><rect width="520" height="470" fill="#faf7f0"/><rect x="110" y="75" width="300" height="300" rx="4" fill="#397ea318" stroke="#397ea3" stroke-width="6"/><path d="M110 410H410" stroke="#d85d4b" stroke-width="4"/><path d="M110 398v24M410 398v24" stroke="#d85d4b" stroke-width="4"/><text x="248" y="445" font-size="28" fill="#d85d4b">x</text><text x="225" y="230" font-size="34" fill="#397ea3">S=x²</text></svg></div>
+ </div>
+ <p class="quote">函数做的事很朴素：给它一个允许的输入，它交回一个确定的输出。</p>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">唯一输出是关键</div>
+ <h2>什么样的对应关系才叫函数？</h2>
+ <div class="definition"><p>如果每个允许的输入 x 都对应唯一的输出 y，我们就说 y 是 x 的函数，记作</p><div class="formula">y=f(x)，x∈D</div></div>
+ <div class="spread" style="margin-top:28px">
+  <div><h3 class="green">这是函数</h3><div class="flow"><div class="box">−2<br>2</div><div class="arrow">→</div><div class="box">4</div></div><p>不同输入可以得到同一个输出。</p></div>
+  <div><h3 class="accent">这不是 y 关于 x 的函数</h3><div class="formula">y²=x</div><p>输入 x=4 时，y 可以是 2，也可以是 −2。一个输入出现了两个输出。</p></div>
+ </div>
+ <p class="note">“唯一”限制的是每个输入对应几个输出，并不要求不同输入必须得到不同输出。</p>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">先确定输入范围</div>
+ <h2>定义域和值域分别是什么？</h2>
+ <div class="flow"><div class="box"><b>定义域</b><br>允许输入的 x</div><div class="arrow">→ f →</div><div class="box"><b>值域</b><br>实际得到的 f(x)</div></div>
+ <p>例如：</p><div class="formula">f(x)=√x</div>
+ <div class="strip">
+  <div class="mini"><b>定义域</b><p>x 必须满足 x≥0，所以定义域是 [0,+∞)。</p></div>
+  <div class="mini"><b>函数值</b><p>输入 x 后，按照规则计算 √x。</p></div>
+  <div class="mini"><b>值域</b><p>平方根不会是负数，所以值域也是 [0,+∞)。</p></div>
+ </div>
+ <p class="quote">看见函数公式，先别急着算：第一件事是检查输入是否合法。</p>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">同一个函数的四种样子</div>
+ <h2>公式不是函数的唯一表达方式</h2>
+ <div class="strip">
+  <div class="mini"><b>文字</b><p>输出等于输入的平方。</p></div>
+  <div class="mini"><b>公式</b><div class="formula">f(x)=x²</div></div>
+  <div class="mini"><b>表格</b><p>x：−2，−1，0，1，2<br>f(x)：4，1，0，1，4</p></div>
+ </div>
+ <div class="art"><svg viewBox="0 0 900 410" role="img" aria-label="抛物线图像"><rect width="900" height="410" fill="#faf7f0"/><path d="M70 335H835M450 380V35" stroke="#777168" stroke-width="2"/><path d="M180 75Q450 585 720 75" fill="none" stroke="#397ea3" stroke-width="7"/><g fill="#d85d4b"><circle cx="315" cy="265" r="8"/><circle cx="450" cy="335" r="8"/><circle cx="585" cy="265" r="8"/></g><text x="715" y="60" font-size="24" fill="#397ea3">y=x²</text></svg></div>
+ <p class="caption">箭头图强调对应关系，表格给出离散数据，公式便于计算，图像让整体规律一眼可见。</p>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">第二节 · 读懂函数图像</div>
+ <h2>图像上的一个点，究竟在说什么？</h2>
+ <div class="lab"><div class="lab-grid">
+  <canvas id="graphCanvas" width="920" height="600" aria-label="沿抛物线移动的点"></canvas>
+  <div class="controls"><div class="control"><label><span>输入 x</span><output id="graphXOut">1.50</output></label><input id="graphX" type="range" min="-2.5" max="2.5" value="1.5" step=".05"></div><div id="graphStatus" class="status good"></div><span class="pill">点的坐标始终是 (x, f(x))</span></div>
+ </div></div>
+ <p>从 x 轴找到输入，竖直走到曲线，再水平看向 y 轴，就能读出函数值。</p>
+ <p class="quote">函数图像不是一条装饰性的线，而是所有点 (x,f(x)) 的集合。</p>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">一张图可以回答很多问题</div>
+ <h2>零点、增减和极值，都藏在图像里</h2>
+ <div class="art"><svg viewBox="0 0 900 470" role="img" aria-label="带有零点增减区间和极值的函数图像"><rect width="900" height="470" fill="#faf7f0"/><path d="M65 300H840M130 420V45" stroke="#777168" stroke-width="2"/><path d="M100 360C190 80 280 100 360 260S525 440 615 220S760 90 820 155" fill="none" stroke="#397ea3" stroke-width="7"/><g fill="#d85d4b"><circle cx="119" cy="300" r="9"/><circle cx="382" cy="300" r="9"/><circle cx="583" cy="300" r="9"/></g><circle cx="235" cy="130" r="10" fill="#d2a33f"/><circle cx="485" cy="354" r="10" fill="#558a68"/><text x="185" y="105" font-size="21" fill="#b07b12">局部最大值</text><text x="500" y="392" font-size="21" fill="#39734f">局部最小值</text><text x="630" y="205" font-size="21" fill="#397ea3">正在增加</text></svg></div>
+ <div class="strip"><div class="mini"><b>零点</b><p>曲线与 x 轴相交的位置，满足 f(x)=0。</p></div><div class="mini"><b>递增与递减</b><p>x 向右移动时，图像上升还是下降。</p></div><div class="mini"><b>极值</b><p>图像由升转降或由降转升的位置。</p></div></div>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">竖线检验</div>
+ <h2>一条竖线，为什么能判断是不是函数？</h2>
+ <div class="spread"><div><p>固定一个 x，就相当于在图中画一条竖线。</p><p>如果竖线与图像交于两个点，同一个输入就对应两个输出，因此它不是 y 关于 x 的函数。</p><div class="definition"><div class="formula">每条竖线至多与图像相交一次</div><p>这正是“每个输入只有一个输出”的图像版本。</p></div></div><div class="art"><svg viewBox="0 0 520 470" role="img" aria-label="圆没有通过竖线检验"><rect width="520" height="470" fill="#faf7f0"/><path d="M50 235H470M260 430V40" stroke="#777168" stroke-width="2"/><circle cx="260" cy="235" r="145" fill="none" stroke="#397ea3" stroke-width="7"/><path d="M340 50V420" stroke="#d85d4b" stroke-width="5" stroke-dasharray="10 8"/><circle cx="340" cy="114" r="10" fill="#d85d4b"/><circle cx="340" cy="356" r="10" fill="#d85d4b"/><text x="352" y="238" font-size="21" fill="#d85d4b">同一个 x</text></svg></div></div>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">图像变换</div>
+ <h2>不重新描点，也能画出新的函数</h2>
+ <div class="lab"><div class="lab-grid"><canvas id="shiftCanvas" width="920" height="600" aria-label="函数图像平移互动图"></canvas><div class="controls"><div class="control"><label><span>水平移动 h</span><output id="shiftHOut">1.0</output></label><input id="shiftH" type="range" min="-2" max="2" value="1" step=".1"></div><div class="control"><label><span>竖直移动 k</span><output id="shiftKOut">0.5</output></label><input id="shiftK" type="range" min="-2" max="2" value=".5" step=".1"></div><span class="pill">y=f(x−h)+k</span></div></div></div>
+ <div class="spread"><div><h3>式子外面改变输出</h3><div class="formula">f(x)+k</div><p>所有函数值都增加 k，所以图像上下移动。</p></div><div><h3>式子里面改变输入</h3><div class="formula">f(x−h)</div><p>原来发生在 0 的位置，现在要到 x=h 才发生，所以向右移动 h。</p></div></div>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">第三节 · 复合函数</div>
+ <h2>一个过程的输出，可以成为下一个过程的输入</h2>
+ <p>设：</p><div class="formula">g(x)=x+1，　f(x)=x²</div>
+ <div class="flow"><div class="box">x</div><div class="arrow">g</div><div class="box">x+1</div><div class="arrow">f</div><div class="box">(x+1)²</div></div>
+ <div class="definition"><p>先做 g，再做 f，得到 f 与 g 的复合函数：</p><div class="formula">(f∘g)(x)=f(g(x))</div></div>
+ <p class="quote">读 f(g(x)) 时，从最里面开始：先把 x 交给 g，再把结果交给 f。</p>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">交换顺序，结果可能完全不同</div>
+ <h2>f∘g 通常不等于 g∘f</h2>
+ <div class="spread"><div><h3>先加 1，再平方</h3><div class="flow"><div class="box">x</div><div class="arrow">+1</div><div class="box">x+1</div><div class="arrow">平方</div></div><div class="formula">(f∘g)(x)=(x+1)²</div></div><div><h3>先平方，再加 1</h3><div class="flow"><div class="box">x</div><div class="arrow">平方</div><div class="box">x²</div><div class="arrow">+1</div></div><div class="formula">(g∘f)(x)=x²+1</div></div></div>
+ <p>取 x=2：</p><div class="formula">(f∘g)(2)=9，　(g∘f)(2)=5</div>
+ <p class="note">复合函数的定义域也要逐层检查：x 必须能进入里面的函数，里面的输出还必须能进入外面的函数。</p>
+ <div class="exercise"><div class="eyebrow">在线练习</div><h3>若 f(x)=√x，g(x)=x−3，那么 f(g(x)) 的定义域是什么？</h3><button class="choice" data-ok="0" data-explain="x 可以是任意实数，但 x−3 还必须能进入平方根。">A. 全体实数</button><button class="choice" data-ok="1" data-explain="正确。要有 √(x−3)，必须满足 x−3≥0，因此 x≥3。">B. x≥3</button><button class="choice" data-ok="0" data-explain="条件方向反了。平方根要求 x−3≥0。">C. x≤3</button><div class="feedback">先写出 f(g(x))=√(x−3)。</div></div>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">第四节 · 反函数</div>
+ <h2>知道输出以后，能不能找回原来的输入？</h2>
+ <p>考虑函数：</p><div class="formula">f(x)=2x+3</div>
+ <div class="flow"><div class="box">输入 x=4</div><div class="arrow">×2，再+3</div><div class="box">输出 y=11</div></div>
+ <p>如果只知道 y=11，可以反过来做：</p>
+ <div class="flow"><div class="box">输出 y=11</div><div class="arrow">−3，再÷2</div><div class="box">原输入 x=4</div></div>
+ <div class="definition"><p>能够把输出唯一地还原成输入的函数，才有反函数。这里：</p><div class="formula">f⁻¹(x)=(x−3)/2</div></div>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">并不是每个函数都能倒过来</div>
+ <h2>x² 为什么在整个实数上没有反函数？</h2>
+ <div class="art"><svg viewBox="0 0 900 430" role="img" aria-label="正负二经过平方都得到四"><rect width="900" height="430" fill="#faf7f0"/><rect x="80" y="95" width="170" height="90" rx="16" fill="#fffdf8" stroke="#397ea3" stroke-width="3"/><rect x="80" y="250" width="170" height="90" rx="16" fill="#fffdf8" stroke="#397ea3" stroke-width="3"/><rect x="650" y="170" width="170" height="90" rx="16" fill="#fffdf8" stroke="#d85d4b" stroke-width="3"/><text x="152" y="150" font-size="34">2</text><text x="142" y="307" font-size="34">−2</text><text x="724" y="226" font-size="34">4</text><path d="M250 140C410 140 500 190 650 210M250 295C410 295 500 245 650 220" fill="none" stroke="#777168" stroke-width="5" marker-end="url(#invArrow)"/><defs><marker id="invArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#777168"/></marker></defs></svg></div>
+ <p>只知道输出是 4，无法判断原来的输入是 2 还是 −2。反向对应不再唯一。</p>
+ <div class="definition"><p>函数必须在所讨论的定义域上是<strong>一一对应</strong>的，才存在反函数。</p></div>
+ <p class="quote">问题不在于“不会解方程”，而在于答案本来就不唯一。</p>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">限制定义域，函数就可能可逆</div>
+ <h2>只保留抛物线的一半</h2>
+ <div class="spread"><div><p>把 f(x)=x² 的定义域限制为：</p><div class="formula">x≥0</div><p>这时每个输出只来自一个输入，于是：</p><div class="formula">f⁻¹(x)=√x</div><div class="definition"><p>若函数在某个区间上严格递增或严格递减，那么它在这个区间上是一一对应的，因此存在反函数。</p></div></div><div class="art"><svg viewBox="0 0 520 470" role="img" aria-label="只保留右半边抛物线"><rect width="520" height="470" fill="#faf7f0"/><path d="M55 400H470M130 435V45" stroke="#777168" stroke-width="2"/><path d="M130 400Q230 380 280 290T390 80" fill="none" stroke="#397ea3" stroke-width="8"/><path d="M130 400Q30 380 -20 290" fill="none" stroke="#b7aea0" stroke-width="6" stroke-dasharray="9 9"/><text x="300" y="115" font-size="22" fill="#397ea3">保留 x≥0</text><text x="170" y="360" font-size="20" fill="#8a8175">删除另一半</text></svg></div></div>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">函数和反函数的图像</div>
+ <h2>交换输入与输出，就是交换横纵坐标</h2>
+ <div class="art"><svg viewBox="0 0 900 500" role="img" aria-label="函数与反函数关于y等于x对称"><rect width="900" height="500" fill="#faf7f0"/><path d="M70 430H835M120 465V35" stroke="#777168" stroke-width="2"/><path d="M90 450L760 45" stroke="#aaa095" stroke-width="3" stroke-dasharray="10 9"/><path d="M160 405C280 340 420 230 690 75" fill="none" stroke="#397ea3" stroke-width="7"/><path d="M145 390C250 300 370 190 650 85" fill="none" stroke="#d85d4b" stroke-width="7"/><circle cx="570" cy="145" r="9" fill="#397ea3"/><circle cx="350" cy="278" r="9" fill="#d85d4b"/><path d="M570 145L350 278" stroke="#777168" stroke-width="2" stroke-dasharray="7 7"/><text x="665" y="92" font-size="22" fill="#397ea3">y=f(x)</text><text x="245" y="245" font-size="22" fill="#d85d4b">y=f⁻¹(x)</text><text x="690" y="145" font-size="20" fill="#777168">y=x</text></svg></div>
+ <div class="formula">(a,b) 在 f 上　⇔　(b,a) 在 f⁻¹ 上</div>
+ <p>所以函数与反函数的图像关于直线 y=x 对称。</p>
+ <p class="note">注意：f⁻¹ 表示反函数，不表示 1/f。</p>
+ <div class="exercise"><div class="eyebrow">在线练习</div><h3>若 f(3)=7，那么 f⁻¹(7) 等于多少？</h3><button class="choice" data-ok="1" data-explain="正确。反函数把输出 7 送回原来的输入 3。">A. 3</button><button class="choice" data-ok="0" data-explain="1/7 是倒数，不是反函数值。">B. 1/7</button><button class="choice" data-ok="0" data-explain="f⁻¹(7) 要找的是产生 7 的输入。">C. 7</button><div class="feedback">把箭头 f(3)=7 反过来看。</div></div>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">从函数走向极限</div>
+ <h2>函数已经会看了，接下来研究“附近”</h2>
+ <p class="lead">函数告诉我们每个输入对应什么输出。但微积分还要问：当输入不断靠近某个位置时，输出呈现什么趋势？</p>
+ <div class="art"><svg viewBox="0 0 900 420" role="img" aria-label="曲线上两侧点靠近空洞"><rect width="900" height="420" fill="#faf7f0"/><path d="M65 350H835M160 390V40" stroke="#777168" stroke-width="2"/><path d="M170 330L760 80" fill="none" stroke="#397ea3" stroke-width="7"/><circle cx="465" cy="205" r="15" fill="#faf7f0" stroke="#397ea3" stroke-width="6"/><g fill="#d85d4b"><circle cx="365" cy="247" r="10"/><circle cx="420" cy="224" r="10"/><circle cx="510" cy="186" r="10"/><circle cx="565" cy="163" r="10"/></g><path d="M330 290Q390 245 440 218M600 130Q540 160 490 194" fill="none" stroke="#d85d4b" stroke-width="4"/><text x="500" y="230" font-size="22" fill="#397ea3">点上可以没有值</text></svg></div>
+ <p class="quote">极限研究的不是“到了这个点以后怎样”，而是“越来越靠近时怎样”。</p>
+ <p class="bridge">先从更简单的一串数开始。</p>
+ <div class="folio"></div>
+</section>
+
+<section class="page" id="sequence">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">第五节 · 数列极限</div>
+ <h2>有一串数，永远写不完</h2>
+ <div class="spread">
+  <div><p>它的前几项是：</p><div class="formula">1，1/2，1/3，1/4，…</div><p>第 n 项可以统一写成：</p><div class="formula">aₙ = <span class="accent">1/n</span></div><p>因为 n 可以一直增大，所以这串数有无穷多项。</p></div>
+  <div class="art">
+   <svg viewBox="0 0 520 470" role="img" aria-label="数列1除以n逐渐靠近0">
+    <rect width="520" height="470" fill="#faf7f0"/>
+    <path d="M60 380H465" stroke="#252420" stroke-width="4"/>
+    <path d="M80 380V110M80 380H475" stroke="#887d6d" stroke-width="2"/>
+    <path d="M80 315H475" stroke="#d85d4b" stroke-width="5" stroke-dasharray="10 9"/>
+    <text x="25" y="322" font-size="30" fill="#d85d4b">0</text>
+    <g fill="#397ea3" stroke="#fff" stroke-width="4">
+     <circle cx="120" cy="145" r="18"/><circle cx="190" cy="230" r="18"/><circle cx="260" cy="260" r="18"/><circle cx="330" cy="276" r="18"/><circle cx="400" cy="284" r="18"/><circle cx="455" cy="290" r="18"/>
+    </g>
+    <g font-size="18" text-anchor="middle" fill="#655d52"><text x="120" y="415">n=1</text><text x="190" y="415">2</text><text x="260" y="415">3</text><text x="330" y="415">4</text><text x="400" y="415">5</text><text x="455" y="415">…</text></g>
+   </svg>
+  </div>
+ </div>
+ <p class="quote">接下来的问题是：当 n 不断增大时，这串数会怎样变化？</p>
+ <div class="folio">2</div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">数列极限 · 先观察现象</div>
+ <h2>n 越大，1/n 越接近 0</h2>
+ <div class="art">
+  <svg viewBox="0 0 900 390" role="img" aria-label="数轴上1除以n逐渐靠近0">
+   <rect width="900" height="390" fill="#faf7f0"/>
+   <path d="M80 200H820" stroke="#292824" stroke-width="4"/><path d="M80 190v20M450 178v44M820 190v20" stroke="#292824" stroke-width="4"/>
+   <text x="445" y="260" text-anchor="middle" font-size="28">0</text>
+   <g fill="#397ea3"><circle cx="800" cy="200" r="17"/><circle cx="635" cy="200" r="17"/><circle cx="570" cy="200" r="17"/><circle cx="535" cy="200" r="17"/><circle cx="515" cy="200" r="17"/></g>
+   <g fill="#655d52" font-size="19" text-anchor="middle"><text x="800" y="155">1</text><text x="635" y="155">1/2</text><text x="570" y="155">1/3</text><text x="535" y="155">1/4</text><text x="515" y="155">1/5</text></g>
+   <path d="M790 300C680 345 565 340 480 275" fill="none" stroke="#d85d4b" stroke-width="5" marker-end="url(#arr)"/>
+   <defs><marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#d85d4b"/></marker></defs>
+   <text x="660" y="355" fill="#d85d4b" font-size="24">越来越接近 0，但始终大于 0</text>
+  </svg>
+ </div>
+ <p>当 n 越来越大，1/n 与 0 的距离越来越小。它不会等于 0，却可以比任何预先给定的正数都小。</p>
+ <p class="quote">我们常把这种现象说成：1/n 可以无限接近 0。</p>
+ <div class="folio">3</div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">数列极限 · 无穷多项</div>
+ <h2>我们不可能把它一项项看完</h2>
+ <div class="art">
+  <svg viewBox="0 0 900 420" role="img" aria-label="没有尽头的数列传送带">
+   <defs><linearGradient id="fade" x1="0" x2="1"><stop offset="0" stop-color="#faf7f0"/><stop offset=".75" stop-color="#faf7f0"/><stop offset="1" stop-color="#faf7f0" stop-opacity="0"/></linearGradient></defs>
+   <rect width="900" height="420" fill="url(#fade)"/>
+   <path d="M65 270C280 180 535 180 860 215" fill="none" stroke="#292824" stroke-width="12"/>
+   <g fill="#397ea3" stroke="#fff" stroke-width="4"><circle cx="120" cy="248" r="28"/><circle cx="250" cy="215" r="25"/><circle cx="385" cy="199" r="22"/><circle cx="520" cy="197" r="20"/><circle cx="650" cy="202" r="18"/><circle cx="760" cy="210" r="16"/></g>
+   <g font-size="21" text-anchor="middle"><text x="120" y="330">a₁</text><text x="250" y="305">a₂</text><text x="385" y="290">a₃</text><text x="520" y="286">a₄</text><text x="650" y="288">…</text></g>
+   <text x="90" y="80" font-size="31">每一项后面，都还有下一项。</text><text x="90" y="123" font-size="21" fill="#777168">因此，无限数列不存在“最后一项”。</text>
+   <g transform="translate(690 42)"><circle cx="70" cy="72" r="38" fill="#fff8eb" stroke="#292824" stroke-width="4"/><circle cx="57" cy="66" r="4"/><circle cx="82" cy="66" r="4"/><path d="M57 87Q70 77 83 87" fill="none" stroke="#292824" stroke-width="4"/><path d="M96 54Q120 23 105 5" fill="none" stroke="#292824" stroke-width="7" stroke-linecap="round"/><text x="70" y="138" text-anchor="middle" font-size="17" fill="#777168">那我要看到什么时候……</text></g>
+  </svg>
+ </div>
+ <p>所以不能依靠“看最后一项”判断它的趋势。我们需要一种能同时描述整个尾部的方法。</p>
+ <div class="folio">4</div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">数列极限 · 直觉还不够</div>
+ <h2>“要多近有多近”，到底有多近？</h2>
+ <p>“1/n 越来越接近 0”是直观判断，但“越来越近”没有说明具体标准。</p>
+ <div class="art">
+  <svg viewBox="0 0 900 430" role="img" aria-label="极限周围的epsilon带">
+   <rect width="900" height="430" fill="#faf7f0"/>
+   <rect x="80" y="145" width="740" height="150" rx="20" fill="#d85d4b22"/>
+   <path d="M80 220H820" stroke="#d85d4b" stroke-width="4" stroke-dasharray="12 9"/>
+   <text x="40" y="227" font-size="27" fill="#d85d4b">L</text><text x="720" y="135" font-size="22" fill="#d85d4b">L + ε</text><text x="720" y="325" font-size="22" fill="#d85d4b">L − ε</text>
+   <g fill="#397ea3"><circle cx="120" cy="72" r="17"/><circle cx="210" cy="350" r="17"/><circle cx="300" cy="185" r="17"/><circle cx="390" cy="255" r="17"/><circle cx="480" cy="205" r="17"/><circle cx="570" cy="235" r="17"/><circle cx="660" cy="214" r="17"/><circle cx="750" cy="224" r="17"/></g>
+   <path d="M255 75V365" stroke="#292824" stroke-width="4"/><text x="255" y="58" text-anchor="middle" font-size="25">N：从这里往后看</text>
+  </svg>
+ </div>
+ <div class="formula">怎样准确描述：数列的尾部与 0 的距离，可以小于任何给定的正数？</div>
+ <p class="caption">我们需要同时说清楚“允许多大误差”和“从第几项开始”。</p>
+ <div class="folio">5</div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">数列极限 · 先试几个具体要求</div>
+ <h2>想离 0 多近，就把要求写出来</h2>
+ <div class="strip">
+  <div class="mini"><b>要求小于 0.1</b><div class="formula">n &gt; 10</div><p class="note">此后 1/n &lt; 0.1。</p></div>
+  <div class="mini"><b>要求小于 0.01</b><div class="formula">n &gt; 100</div><p class="note">此后 1/n &lt; 0.01。</p></div>
+  <div class="mini"><b>要求小于 0.001</b><div class="formula">n &gt; 1000</div><p class="note">此后 1/n &lt; 0.001。</p></div>
+ </div>
+ <p>规律已经出现：允许的误差越小，就需要从越后面开始看。但无论要求多严格，总能找到这样一个开始位置。</p>
+ <div class="history"><p><b>历史小注：</b>19 世纪，数学家逐渐用 ε 语言取代“无限接近”这类直观说法，极限才有了今天的严格定义。</p></div>
+ <div class="folio">6</div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">数列极限 · 把规律写成定义</div>
+ <h2>ε–N 语言给出了准确描述</h2>
+ <p>把“允许的误差”统一记作 ε，把“从这里开始”记作 N。数列极限的定义是：</p>
+ <div class="definition">
+  <p>对任意 ε &gt; 0，都存在正整数 N，使得当 n &gt; N 时，</p>
+  <div class="formula">|aₙ − L| &lt; ε</div>
+  <p>那么称数列 aₙ 收敛到 L，记作 lim<sub>n→∞</sub> aₙ = L。</p>
+ </div>
+ <p class="quote">这串符号只表达一件事：无论允许的误差多小，数列的整个尾部最终都能进入这个误差范围。</p>
+ <div class="folio">7</div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">数列极限 · 逐句读懂</div>
+ <h2>定义中的三个量词分别在说什么？</h2>
+ <div class="strip">
+  <div class="mini"><b>任意 ε &gt; 0</b><p>无论允许的误差有多小。</p></div>
+  <div class="mini"><b>存在 N</b><p>总能找到一个开始位置；N 可以随 ε 改变。</p></div>
+  <div class="mini"><b>任意 n &gt; N</b><p>从 N 后面开始的每一项，而不是其中几项。</p></div>
+ </div>
+ <div class="lab">
+  <div class="lab-grid">
+   <canvas id="seqCanvas" width="920" height="600" aria-label="epsilon-N交互图"></canvas>
+   <div class="controls">
+    <div class="control"><label><span>允许误差 ε</span><output id="epsOut">0.20</output></label><input id="eps" type="range" min=".03" max=".50" value=".20" step=".01"></div>
+    <div class="control"><label><span>开始位置 N</span><output id="nOut">5</output></label><input id="nCut" type="range" min="1" max="40" value="5" step="1"></div>
+    <div id="seqStatus" class="status"></div>
+    <button class="action" id="findN">计算一个可行的 N</button>
+    <span class="pill">数列：aₙ = 1/n，极限：L = 0</span>
+   </div>
+  </div>
+ </div>
+ <p class="note">拖动 ε 后，原来的 N 可能不再满足要求；但总能把 N 向后移动，直到整个尾部进入误差范围。</p>
+ <div class="folio">8</div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">数列极限 · 用定义排除假象</div>
+ <h2>为什么“大多数项接近 0”还不够？</h2>
+ <div class="art">
+  <svg viewBox="0 0 900 420" role="img" aria-label="不断出现尖峰的不收敛数列">
+   <rect width="900" height="420" fill="#faf7f0"/><path d="M60 305H840" stroke="#d85d4b" stroke-width="4" stroke-dasharray="10 8"/>
+   <path d="M70 300L125 294L180 300L235 78L290 300L345 296L400 300L455 72L510 300L565 297L620 300L675 82L730 300L785 298L835 300" fill="none" stroke="#397ea3" stroke-width="5"/>
+   <g fill="#d85d4b"><circle cx="235" cy="78" r="13"/><circle cx="455" cy="72" r="13"/><circle cx="675" cy="82" r="13"/></g>
+   <text x="85" y="355" font-size="22">绝大多数项靠近 0</text><text x="480" y="45" font-size="22" fill="#d85d4b">但尖峰永远还会再来</text>
+  </svg>
+ </div>
+ <p>因为定义要求的是<strong>所有 n&gt;N</strong>。如果无论 N 取多大，后面仍有尖峰落在 ε 范围之外，那么这个数列就不收敛到 0。</p>
+ <div class="definition"><p>“从某处以后都成立”不同于“以后经常成立”。前者要求所有后续项都满足条件。</p></div>
+ <div class="folio">9</div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">数列极限 · 再检验一个例子</div>
+ <h2>正负交替，也可能收敛</h2>
+ <div class="spread">
+  <div class="art"><svg viewBox="0 0 540 480" role="img" aria-label="正负交替且趋近0的数列"><rect width="540" height="480" fill="#faf7f0"/><path d="M55 240H500" stroke="#d85d4b" stroke-width="4"/><path d="M70 60V420" stroke="#777168" stroke-width="2"/><path d="M90 70L140 400L190 130L240 335L290 175L340 305L390 197L440 285L485 210" fill="none" stroke="#397ea3" stroke-width="5"/><g fill="#397ea3"><circle cx="90" cy="70" r="10"/><circle cx="140" cy="400" r="10"/><circle cx="190" cy="130" r="10"/><circle cx="240" cy="335" r="10"/><circle cx="290" cy="175" r="10"/><circle cx="340" cy="305" r="10"/><circle cx="390" cy="197" r="10"/><circle cx="440" cy="285" r="10"/><circle cx="485" cy="210" r="10"/></g><text x="90" y="36" font-size="22">aₙ = (−1)ⁿ/n</text><text x="28" y="248" font-size="22" fill="#d85d4b">0</text></svg></div>
+  <div><div class="formula">aₙ = (−1)ⁿ/n</div><p>它在 0 的上方和下方交替出现，但</p><div class="formula">|aₙ−0| = 1/n</div><p>与 0 的距离仍然越来越小。因此它收敛到 0。</p></div>
+ </div>
+ <p class="quote">定义关注的是与 L 的距离，而不是从哪一侧靠近。</p>
+ <div class="folio">10</div>
+</section>
+
+<section class="page" id="proof">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">数列极限 · 定义怎样变成证明</div>
+ <h2>现在证明 1/n 确实趋近于 0</h2>
+ <p>整章从这个数列开始。现在我们已经有了准确的定义，只需把误差条件转化为对 n 的要求：</p>
+ <div class="formula">|aₙ − 0| = |1/n| = <span class="accent">1/n</span></div>
+ <div class="art">
+  <svg viewBox="0 0 900 330" role="img" aria-label="把epsilon条件转成n的条件">
+   <rect width="900" height="330" fill="#faf7f0"/>
+   <g font-family="Georgia,serif" font-size="34" text-anchor="middle"><text x="155" y="145">1/n &lt; ε</text><text x="450" y="145">⇔</text><text x="735" y="145">n &gt; 1/ε</text></g>
+   <path d="M260 135H375" stroke="#d85d4b" stroke-width="5" marker-end="url(#arr2)"/>
+   <defs><marker id="arr2" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#d85d4b"/></marker></defs>
+   <text x="450" y="235" text-anchor="middle" font-size="24" fill="#777168">把误差条件转化为对 n 的条件</text>
+  </svg>
+ </div>
+ <p>所以只要选择一个整数 N ≥ 1/ε，当 n&gt;N 时就必有 1/n&lt;ε。这正好满足定义。</p>
+ <div class="folio">11</div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">数列极限 · 完成闭环</div>
+ <h2>把刚才的推理写完整</h2>
+ <div class="strip">
+  <div class="mini"><b>① 给定 ε</b><p>任取 ε &gt; 0。</p></div>
+  <div class="mini"><b>② 选择 N</b><p>取 N ≥ 1/ε 的正整数。</p></div>
+  <div class="mini"><b>③ 验证条件</b><p>当 n &gt; N 时，1/n &lt; 1/N ≤ ε。</p></div>
+ </div>
+ <div class="definition"><div class="formula">|1/n − 0| = 1/n &lt; ε</div><p>因此，lim<sub>n→∞</sub> 1/n = 0。证毕。</p></div>
+ <p class="quote">证明的四步是：给定 ε，选择 N，验证不等式，写出结论。</p>
+ <div class="exercise">
+  <div class="eyebrow">在线练习 01</div><h3>若 ε=0.04，最小可以选择哪个整数 N？</h3><p class="note">要求：只要 n&gt;N，就有 1/n&lt;0.04。</p>
+  <button class="choice" data-ok="0" data-explain="N=10 时，n=11 仍有 1/11&gt;0.04。">A. N=10</button>
+  <button class="choice" data-ok="0" data-explain="N=24 时，n=25 有 1/25=0.04，不满足严格小于。">B. N=24</button>
+  <button class="choice" data-ok="1" data-explain="正确。n&gt;25 时，n 至少为 26，因此 1/n&lt;0.04。">C. N=25</button>
+  <button class="choice" data-ok="0" data-explain="N=26 也可行，但题目问的是最小整数 N。">D. N=26</button>
+  <div class="feedback" id="quiz1">先把 1/n&lt;0.04 改写成 n&gt;25。</div>
+ </div>
+ <div class="folio">12</div>
+</section>
+
+<section class="page chapter" id="function-limit">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">第六节 · 函数极限</div>
+ <h2>从数列极限到函数极限</h2>
+ <p class="lead">数列让 n 不断增大；函数让 x 不断靠近某个位置。问题仍然相同：怎样准确描述“越来越接近”？</p>
+ <div class="hero-number">δ</div><div class="folio">13</div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">函数极限 · 先遇到一个麻烦</div>
+ <h2>这个函数在 x=1 时没有值</h2>
+ <div class="formula">g(x)=<span class="frac"><span>x²−1</span><span>x−1</span></span></div>
+ <p>把 x=1 代入，分子和分母都等于 0，函数没有定义。</p>
+ <div class="art">
+  <svg viewBox="0 0 900 470" role="img" aria-label="有空洞但存在极限的曲线">
+   <rect width="900" height="470" fill="#faf7f0"/><path d="M80 400H830M160 430V50" stroke="#777168" stroke-width="2"/>
+   <path d="M170 355L760 80" fill="none" stroke="#397ea3" stroke-width="7"/>
+   <circle cx="455" cy="222" r="15" fill="#faf7f0" stroke="#397ea3" stroke-width="6"/>
+   <path d="M455 400V222M160 222H455" stroke="#d85d4b" stroke-width="3" stroke-dasharray="9 8"/>
+   <text x="443" y="438" font-size="25">1</text><text x="115" y="230" font-size="25">2</text>
+   <text x="492" y="205" font-size="22" fill="#397ea3">这里有一个空洞</text>
+  </svg>
+ </div>
+ <p>但这不等于“附近没有规律”。当 x≠1 时，可以约去 x−1：</p>
+ <div class="formula">g(x)=x+1</div>
+ <p class="quote">函数在 x=1 没有值，但 x 靠近 1 时，g(x) 会靠近哪里？</p><div class="folio">14</div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">函数极限 · 先看附近发生了什么</div>
+ <h2>x 越接近 1，g(x) 越接近 2</h2>
+ <div class="art">
+  <svg viewBox="0 0 900 430" role="img" aria-label="x从左右两侧靠近1时函数值靠近2">
+   <rect width="900" height="430" fill="#faf7f0"/><path d="M70 365H830M450 395V40" stroke="#777168" stroke-width="2"/>
+   <path d="M120 330L780 70" fill="none" stroke="#397ea3" stroke-width="7"/><circle cx="450" cy="200" r="13" fill="#faf7f0" stroke="#397ea3" stroke-width="6"/>
+   <g fill="#d85d4b"><circle cx="350" cy="239" r="11"/><circle cx="405" cy="218" r="11"/><circle cx="495" cy="182" r="11"/><circle cx="550" cy="161" r="11"/></g>
+   <path d="M330 300Q385 265 430 220M570 115Q520 135 470 185" fill="none" stroke="#d85d4b" stroke-width="4"/>
+   <text x="300" y="324" font-size="21" fill="#d85d4b">从左边靠近</text><text x="570" y="105" font-size="21" fill="#d85d4b">从右边靠近</text>
+  </svg>
+ </div>
+ <div class="strip">
+  <div class="mini"><b>x=0.9</b><div class="formula">g(x)=1.9</div></div>
+  <div class="mini"><b>x=0.99</b><div class="formula">g(x)=1.99</div></div>
+  <div class="mini"><b>x=1.01</b><div class="formula">g(x)=2.01</div></div>
+ </div>
+ <p class="quote">无论从左边还是右边靠近 1，函数值都在靠近 2。</p>
+ <div class="folio">15</div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">函数极限 · 两个方向必须一致</div>
+ <h2>左极限和右极限必须相等</h2>
+ <div class="spread">
+  <div><h3>左边靠近</h3><div class="formula">lim<sub>x→1⁻</sub>g(x)=2</div><p>x 取比 1 小的值，并逐渐靠近 1。</p></div>
+  <div><h3>右边靠近</h3><div class="formula">lim<sub>x→1⁺</sub>g(x)=2</div><p>x 取比 1 大的值，并逐渐靠近 1。</p></div>
+ </div>
+ <div class="definition"><div class="formula">左极限 = 右极限 = 2</div><p>因此，lim<sub>x→1</sub>g(x)=2。</p></div>
+ <p>如果左右两侧趋近不同的值，那么双侧极限不存在。</p>
+ <p class="quote">现在只剩最后一个问题：“靠近 2”怎样写成准确的误差条件？</p>
+ <div class="folio">16</div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">函数极限 · 先试几个具体要求</div>
+ <h2>要让误差更小，x 就要靠得更近</h2>
+ <p>在 x≠1 时，g(x)=x+1，所以函数值与 2 的距离正好等于 x 与 1 的距离：</p>
+ <div class="definition"><div class="formula">|g(x)−2|=|(x+1)−2|=|x−1|</div></div>
+ <div class="strip">
+  <div class="mini"><b>ε=0.1</b><p>可以取 δ=0.1。</p></div>
+  <div class="mini"><b>ε=0.01</b><p>可以取 δ=0.01。</p></div>
+  <div class="mini"><b>任意 ε&gt;0</b><p>都可以直接取 δ=ε。</p></div>
+ </div>
+ <p class="quote">ε 规定函数值必须多接近 2；δ 回答 x 必须多接近 1。</p>
+ <div class="folio">17</div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">函数极限 · 把规律写成定义</div>
+ <h2>函数极限的 ε–δ 定义</h2>
+ <div class="definition"><p>如果对于任意 ε &gt; 0，都存在 δ &gt; 0，使得只要</p><div class="formula">0 &lt; |x−a| &lt; δ</div><p>就有 |f(x)−L| &lt; ε，那么 lim<sub>x→a</sub>f(x)=L。</p></div>
+ <div class="spread">
+  <div><h3>为什么写 0&lt;|x−a|？</h3><p>它排除了 x=a。极限研究的是 a 附近的趋势，不要求函数在 a 有定义。</p></div>
+  <div><h3>δ 是固定的吗？</h3><p>不是。ε 越小，通常要选择更小的 δ。δ 可以依赖 ε。</p></div>
+ </div>
+ <p class="quote">任意 ε，是读者提出要求；存在 δ，是函数必须给出的回答。</p>
+ <div class="folio">18</div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">函数极限 · 互动实验</div>
+ <h2>拖动 ε 和 δ，看看定义怎样工作</h2>
+ <p>红色横带是函数值允许进入的范围，蓝色竖带是 x 可以活动的范围。目标是让蓝色范围内的曲线全部落在红色范围内。</p>
+ <div class="lab">
+  <div class="lab-grid">
+   <canvas id="fnCanvas" width="920" height="600" aria-label="函数g在x等于1附近的epsilon-delta交互图"></canvas>
+   <div class="controls">
+    <div class="control"><label><span>输出误差 ε</span><output id="fepsOut">0.40</output></label><input id="feps" type="range" min=".05" max="1.2" value=".40" step=".01"></div>
+    <div class="control"><label><span>输入范围 δ</span><output id="deltaOut">0.15</output></label><input id="delta" type="range" min=".02" max=".70" value=".15" step=".01"></div>
+    <div id="fnStatus" class="status"></div>
+    <button class="action" id="safeDelta">令 δ=ε（不超过滑块范围）</button>
+    <span class="pill">x 靠近 1 → g(x) 靠近 2</span>
+   </div>
+  </div>
+ </div>
+ <p class="note">这个例子中 |g(x)−2|=|x−1|，所以只要 δ≤ε，就一定满足要求。空心点提醒我们：极限不要求 g(1) 存在。</p>
+ <div class="folio">19</div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">函数极限 · 立即检验</div>
+ <h2>你能为 ε 选出合适的 δ 吗？</h2>
+ <p>仍然考虑 <span class="math-inline">g(x)=(x²−1)/(x−1)</span>，并让 x→1。现在要求：</p>
+ <div class="formula">|g(x)−2|&lt;0.05</div>
+ <div class="exercise">
+  <div class="eyebrow">在线练习 02</div><h3>下面哪个是最大的可行 δ？</h3>
+  <button class="choice" data-ok="0" data-explain="δ=0.01 可以满足要求，但还不是最大的可行值。">A. δ=0.01</button>
+  <button class="choice" data-ok="1" data-explain="正确。因为 |g(x)−2|=|x−1|，取 δ=0.05 正好保证误差小于 0.05。">B. δ=0.05</button>
+  <button class="choice" data-ok="0" data-explain="δ=0.10 太大。例如 x=1.08 在 δ 范围内，但函数值误差是 0.08。">C. δ=0.10</button>
+  <div class="feedback">提示：先利用 |g(x)−2|=|x−1|，再比较 δ 与 ε。</div>
+ </div>
+ <p class="quote">会读定义之后，还要会根据函数关系选出 δ。</p>
+ <div class="folio">20</div>
+</section>
+
+<section class="page chapter" id="continuity">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">第七节 · 连续性</div>
+ <h2>有极限，就一定连续吗？</h2>
+ <p class="lead">刚才的 g(x) 在 x→1 时极限是 2，可是 g(1) 根本不存在。图像上的空洞说明：有极限，还不够。</p>
+ <div class="hero-number">●</div><div class="folio">21</div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">连续性 · 三个条件缺一不可</div>
+ <h2>连续，就是极限与函数值接上了</h2>
+ <p>函数 f 在 x=a 处连续，需要同时满足三件事：</p>
+ <div class="strip">
+  <div class="mini"><b>① 点上有值</b><div class="formula">f(a) 存在</div></div>
+  <div class="mini"><b>② 附近有趋势</b><div class="formula">lim<sub>x→a</sub>f(x) 存在</div></div>
+  <div class="mini"><b>③ 两者相等</b><div class="formula">lim<sub>x→a</sub>f(x)=f(a)</div></div>
+ </div>
+ <div class="definition"><div class="formula">lim<sub>x→a</sub>f(x)=f(a)</div><p>这条等式很短，但它已经包含“点上有值、极限存在、两者相等”。</p></div>
+ <p class="quote">极限只看附近；连续还要求附近的趋势准确落到这个点上。</p>
+ <div class="folio">22</div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">连续性 · 把空洞补上</div>
+ <h2>给 x=1 补上函数值 2</h2>
+ <div class="spread">
+  <div><p>定义一个新函数：</p><div class="formula" style="font-size:25px">h(x)=g(x)，x≠1<br>h(1)=2</div><p>附近的规律没有改变，空洞却被补上了。</p><div class="definition"><div class="formula">lim<sub>x→1</sub>h(x)=h(1)=2</div><p>所以 h 在 x=1 处连续。</p></div></div>
+  <div class="art">
+   <svg viewBox="0 0 520 470" role="img" aria-label="补上空洞后连续的直线">
+    <rect width="520" height="470" fill="#faf7f0"/><path d="M55 405H470M120 435V45" stroke="#777168" stroke-width="2"/>
+    <path d="M125 350L445 90" fill="none" stroke="#397ea3" stroke-width="7"/>
+    <circle cx="285" cy="220" r="13" fill="#397ea3"/>
+    <path d="M285 405V220M120 220H285" stroke="#d85d4b" stroke-width="3" stroke-dasharray="9 8"/>
+    <text x="274" y="438" font-size="24">1</text><text x="82" y="228" font-size="24">2</text><text x="307" y="205" font-size="20" fill="#397ea3">补上的点</text>
+   </svg>
+  </div>
+ </div>
+ <div class="folio">23</div>
+</section>
+
+<section class="page">
+ <div class="running">第一章 · 函数与极限</div><div class="kicker">连续性 · 不连续也有不同原因</div>
+ <h2>图像断开，大致有三种常见方式</h2>
+ <div class="strip">
+  <div class="mini"><b>可去间断</b><p>极限存在，但点没定义，或者函数值放错了位置。补上正确的点即可连续。</p></div>
+  <div class="mini"><b>跳跃间断</b><p>左极限和右极限都存在，却不相等。两边接不上。</p></div>
+  <div class="mini"><b>无穷间断</b><p>靠近某点时，函数值无限增大或减小，不能趋近一个有限值。</p></div>
+ </div>
+ <div class="exercise">
+  <div class="eyebrow">在线练习 03</div><h3>原来的 g(x) 在 x=1 属于哪一种情况？</h3>
+  <button class="choice" data-ok="1" data-explain="正确。极限是 2，只需定义 g(1)=2，就能补上空洞。">A. 可去间断</button>
+  <button class="choice" data-ok="0" data-explain="左右极限都是 2，并没有发生跳跃。">B. 跳跃间断</button>
+  <button class="choice" data-ok="0" data-explain="函数值在附近趋近 2，没有无限增大。">C. 无穷间断</button>
+  <div class="feedback">回想那条有一个空心点的直线。</div>
+ </div>
+ <p class="quote">判断连续性时，先查函数值，再查极限，最后比较两者。</p>
+ <div class="folio">24</div>
+</section>
+
+<section class="page" id="chapter1-summary">
+ <div class="running">第一章 · 小结</div><div class="kicker">从函数走到连续</div>
+ <h2>函数给出关系，极限说明附近的趋势</h2>
+ <p class="lead">先看清输入怎样决定输出，再把“无限靠近”写成可以验证的误差条件。</p>
+ <div class="summary-grid">
+  <div class="summary-card"><h3>函数</h3><p>每个允许的输入对应唯一输出；图像是所有点 (x,f(x)) 的集合。</p></div>
+  <div class="summary-card"><h3>复合与反函数</h3><p>复合把过程连接起来，反函数把输出唯一地还原成输入。</p></div>
+  <div class="summary-card"><h3>极限与连续</h3><p>极限描述附近的趋势；连续要求这个趋势正好落到函数值上。</p></div>
+  <div class="summary-card"><h3>下一章</h3><p>当靠近的速度本身成为研究对象，我们就会遇见导数。</p></div>
+ </div>
+ <p class="quote">第一章完成了准备工作：我们已经能描述一个函数，也能准确描述它在某点附近的行为。</p>
+ <div class="folio">25</div>
+</section>
+
+<section class="page chapter" id="derivative">
+ <div class="running">第二章 · 导数</div><div class="kicker">变化到底有多快？</div>
+ <h2>平均速度知道了，某一瞬间的速度呢？</h2>
+ <p class="lead">导数不是一套求导口诀。它要解决的是：一个变化过程在某个瞬间，究竟变化得多快。</p>
+ <div class="hero-number">f′</div><div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第二章 · 导数</div><div class="kicker">第一节 · 从平均变化率开始</div>
+ <h2>两秒走了十米，只能说明平均速度</h2>
+ <p>两秒内从 0 米走到 10 米，只能得到平均速度 5 米/秒。至于中间是先慢后快，还是始终匀速，这个数没有说明。一般地，在 t 到 t+h 之间：</p>
+ <div class="definition"><div class="formula">平均速度 = <span class="frac"><span>s(t+h)−s(t)</span><span>h</span></span></div><p>分子是位置变化，分母是时间变化。</p></div>
+ <div class="art"><svg viewBox="0 0 900 390" role="img" aria-label="物体在两个时刻的位置"><rect width="900" height="390" fill="#faf7f0"/><path d="M80 275H820" stroke="#777168" stroke-width="4"/><circle cx="250" cy="275" r="15" fill="#397ea3"/><circle cx="680" cy="275" r="15" fill="#d85d4b"/><path d="M270 235Q460 115 660 235" fill="none" stroke="#d2a33f" stroke-width="5" marker-end="url(#speedArrow)"/><defs><marker id="speedArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#d2a33f"/></marker></defs><text x="215" y="320" font-size="24">t</text><text x="635" y="320" font-size="24">t+h</text><text x="355" y="100" font-size="25" fill="#a47518">这一段的平均速度</text></svg></div>
+ <p class="quote">平均速度把一整段过程压成一个数，却没有告诉我们中间每一瞬间发生了什么。</p>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第二章 · 导数</div><div class="kicker">把时间间隔不断缩短</div>
+ <h2>割线靠近切线，平均变化率靠近瞬时变化率</h2>
+ <div class="lab"><div class="lab-grid"><canvas id="tangentCanvas" width="920" height="600" aria-label="割线趋近切线互动图"></canvas><div class="controls"><div class="control"><label><span>两点间隔 h</span><output id="tangentHOut">1.20</output></label><input id="tangentH" type="range" min="-1.5" max="1.5" value="1.2" step=".05"></div><div id="tangentStatus" class="status"></div><span class="pill">曲线 y=x²，固定 x=1</span></div></div></div>
+ <p>让 h 从正、负两侧靠近 0，第二个点会从左右两边靠近第一个点；割线也逐渐靠近同一条切线。</p>
+ <p class="quote">导数的核心动作仍然是极限：让 h 趋近 0。</p>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第二章 · 导数</div><div class="kicker">第二节 · 导数的定义</div>
+ <h2>把“这一瞬间有多快”写成公式</h2>
+ <div class="definition"><p>若下面的有限极限存在，就称它为函数 f 在 x=a 处的导数：</p><div class="formula">f′(a)=lim<sub>h→0</sub><span class="frac"><span>f(a+h)−f(a)</span><span>h</span></span></div></div>
+ <div class="strip"><div class="mini"><b>f(a+h)−f(a)</b><p>函数值发生了多少变化。</p></div><div class="mini"><b>除以 h</b><p>得到这一小段上的平均变化率。</p></div><div class="mini"><b>令 h→0</b><p>把区间压到一个点，得到瞬时变化率。</p></div></div>
+ <p>从图像看，导数是切线斜率；从运动看，导数是瞬时速度；从数量关系看，导数是局部变化率。</p>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第二章 · 导数</div><div class="kicker">用定义算一次</div>
+ <h2>为什么 x² 的导数是 2x？</h2>
+ <div class="checklist">
+  <div>① 写差商：［(x+h)²−x²］/h</div>
+  <div>② 展开并约去 h：［2xh+h²］/h = 2x+h</div>
+  <div>③ 令 h→0：2x+h → 2x</div>
+ </div>
+ <div class="definition"><div class="formula">如果 f(x)=x²，那么 f′(x)=2x</div><p>这不是由图像“猜”出来的，而是从导数定义推出的。</p></div>
+ <p class="note">在 h→0 的过程中，h 始终不是 0，所以可以先约去 h，再取极限。</p>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第二章 · 导数</div><div class="kicker">有函数值，也可能没有导数</div>
+ <h2>尖角处为什么不可导？</h2>
+ <div class="spread"><div><p>考虑：</p><div class="formula">f(x)=|x|</div><p>在 x=0 左边，图像斜率是 −1；在右边，斜率是 1。</p><div class="definition"><div class="formula">f′₋(0)=−1，　f′₊(0)=1</div><p>左右导数不同，因此 f′(0) 不存在。</p></div></div><div class="art"><svg viewBox="0 0 520 470" role="img" aria-label="绝对值函数在原点有尖角"><rect width="520" height="470" fill="#faf7f0"/><path d="M45 390H475M260 430V45" stroke="#777168" stroke-width="2"/><path d="M80 100L260 390L440 100" fill="none" stroke="#397ea3" stroke-width="8"/><circle cx="260" cy="390" r="11" fill="#d85d4b"/><text x="280" y="350" font-size="22" fill="#d85d4b">左右斜率不一致</text></svg></div></div>
+ <p class="quote">连续只要求函数值接得上；可导还要求左右差商趋向同一个有限值。</p>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第二章 · 导数</div><div class="kicker">第三节 · 从一个点到整条新函数</div>
+ <h2>每个位置都有一个斜率，于是得到导函数</h2>
+ <div class="spread"><div><div class="art"><svg viewBox="0 0 520 390" role="img" aria-label="抛物线不同位置的切线"><rect width="520" height="390" fill="#faf7f0"/><path d="M45 330H475M260 365V35" stroke="#777168" stroke-width="2"/><path d="M80 70Q260 590 440 70" fill="none" stroke="#397ea3" stroke-width="7"/><path d="M105 195L230 350M290 350L420 180" stroke="#d85d4b" stroke-width="4"/><path d="M185 330H335" stroke="#d2a33f" stroke-width="4"/></svg></div><p class="caption">左边斜率为负，中间为零，右边为正。</p></div><div><p>对定义域中的每个 x 都计算导数，就得到一个新的函数：</p><div class="formula">x ↦ f′(x)</div><p>原函数记录“高度”，导函数记录“斜率”。</p><div class="strip" style="grid-template-columns:1fr"><div class="mini"><b>f′(x)&gt;0</b><p>原函数正在增加。</p></div><div class="mini"><b>f′(x)&lt;0</b><p>原函数正在减少。</p></div></div></div></div>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第二章 · 导数</div><div class="kicker">第四节 · 基本求导法则</div>
+ <h2>不必每次都从极限定义重新开始</h2>
+ <div class="strip"><div class="mini"><b>常数</b><div class="formula">(C)′=0</div></div><div class="mini"><b>幂函数</b><div class="formula">(xⁿ)′=nxⁿ⁻¹</div></div><div class="mini"><b>和与差</b><div class="formula">(f±g)′=f′±g′</div></div></div>
+ <div class="spread"><div><h3>乘积法则</h3><div class="formula">(fg)′=f′g+fg′</div><p>两个因子都在变化，所以两部分变化都要计算。</p></div><div><h3>商法则</h3><div class="formula">(f/g)′=<span class="frac"><span>f′g−fg′</span><span>g²</span></span></div><p>同时要求 g(x)≠0。</p></div></div>
+ <div class="exercise"><div class="eyebrow">在线练习</div><h3>若 f(x)=3x²−5x+4，那么 f′(x) 是什么？</h3><button class="choice" data-ok="1" data-explain="正确。逐项求导：3x²→6x，−5x→−5，常数4→0。">A. 6x−5</button><button class="choice" data-ok="0" data-explain="幂函数求导后，指数要减 1。">B. 6x²−5</button><button class="choice" data-ok="0" data-explain="常数项的导数是 0，不是 4。">C. 6x−5+4</button><div class="feedback">逐项使用幂函数法则。</div></div>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第二章 · 导数</div><div class="kicker">第五节 · 链式法则</div>
+ <h2>复合函数怎样把变化一层层传下去？</h2>
+ <p>考虑：</p><div class="formula">y=(x²+1)³</div>
+ <div class="flow"><div class="box">x</div><div class="arrow">平方再+1</div><div class="box">u=x²+1</div><div class="arrow">立方</div><div class="box">y=u³</div></div>
+ <p>外层对 u 的变化率是 3u²，内层对 x 的变化率是 2x。总变化率是两者相乘：</p>
+ <div class="definition"><div class="formula">dy/dx = dy/du · du/dx</div><div class="formula">y′=3(x²+1)²·2x</div></div>
+ <p class="quote">复合函数是把过程串起来；链式法则是把每一层的变化率乘起来。</p>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第二章 · 导数</div><div class="kicker">第六节 · 用导数研究原函数</div>
+ <h2>函数什么时候上升？最高点在哪里？</h2>
+ <div class="art"><svg viewBox="0 0 900 450" role="img" aria-label="导数符号决定函数增减"><rect width="900" height="450" fill="#faf7f0"/><path d="M65 320H835M130 400V45" stroke="#777168" stroke-width="2"/><path d="M120 330C250 80 390 95 470 270S675 410 810 105" fill="none" stroke="#397ea3" stroke-width="7"/><circle cx="315" cy="135" r="10" fill="#d85d4b"/><circle cx="585" cy="335" r="10" fill="#d85d4b"/><path d="M140 365H300M330 365H565M605 365H790" stroke-width="8" stroke-linecap="round"/><path d="M140 365H300M605 365H790" stroke="#558a68" stroke-width="8"/><path d="M330 365H565" stroke="#d85d4b" stroke-width="8"/><text x="175" y="400" font-size="21" fill="#558a68">f′&gt;0</text><text x="420" y="400" font-size="21" fill="#d85d4b">f′&lt;0</text><text x="675" y="400" font-size="21" fill="#558a68">f′&gt;0</text></svg></div>
+ <div class="checklist"><div>① 解方程 f′(x)=0，找出可能的转折位置。</div><div>② 检查各区间内 f′ 的正负，判断上升或下降。</div><div>③ 导数由正变负时出现局部最大值；由负变正时出现局部最小值。</div></div>
+ <p class="note">f′(x)=0 只说明切线水平，不自动保证那里一定是极值。</p>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第二章 · 导数</div><div class="kicker">第二章小结</div>
+ <h2>导数把局部变化变成一个可以计算的数</h2>
+ <div class="summary-grid"><div class="summary-card"><h3>定义</h3><p>导数是差商在 h→0 时的极限。</p></div><div class="summary-card"><h3>图像</h3><p>导数是曲线在该点的切线斜率。</p></div><div class="summary-card"><h3>现实意义</h3><p>导数描述瞬时速度、边际变化和局部敏感程度。</p></div><div class="summary-card"><h3>计算</h3><p>基本法则和链式法则让复杂函数可以逐层求导。</p></div></div>
+ <p class="bridge">导数把一段变化压到一个点；接下来反过来，把无数个微小变化重新加起来。</p>
+ <div class="folio"></div>
+</section>
+
+<section class="page chapter" id="integral">
+ <div class="running">第三章 · 积分</div><div class="kicker">无数个小量怎样加起来？</div>
+ <h2>曲线下面不是长方形，面积还能怎样计算？</h2>
+ <p class="lead">积分从“切成小块再相加”开始。小块越来越细，近似值就逐渐逼近真正的累积量。</p>
+ <div class="hero-number">∫</div><div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第三章 · 积分</div><div class="kicker">第一节 · 先从面积问题开始</div>
+ <h2>不会算曲边面积，就先用长方形铺满它</h2>
+ <div class="art"><svg viewBox="0 0 900 470" role="img" aria-label="用少量长方形近似曲线下面积"><rect width="900" height="470" fill="#faf7f0"/><path d="M65 390H840M110 430V45" stroke="#777168" stroke-width="2"/><path d="M110 390C260 365 470 250 790 70" fill="none" stroke="#397ea3" stroke-width="7"/><g fill="#d85d4b22" stroke="#d85d4b" stroke-width="2"><rect x="110" y="355" width="135" height="35"/><rect x="245" y="310" width="135" height="80"/><rect x="380" y="245" width="135" height="145"/><rect x="515" y="165" width="135" height="225"/><rect x="650" y="85" width="135" height="305"/></g></svg></div>
+ <p>每个长方形的面积是“宽 × 高”。把所有长方形面积相加，就得到曲边面积的近似值。</p>
+ <div class="formula">近似面积 = Σ f(xᵢ*)Δx</div>
+ <p class="quote">关键不在于长方形，而在于：切小、近似、相加，再让小块无限变细。</p>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第三章 · 积分</div><div class="kicker">分得越细，会发生什么？</div>
+ <h2>拖动 n，观察黎曼和怎样靠近面积</h2>
+ <div class="lab"><div class="lab-grid"><canvas id="riemannCanvas" width="920" height="600" aria-label="黎曼和长方形数量互动图"></canvas><div class="controls"><div class="control"><label><span>长方形数量 n</span><output id="riemannNOut">8</output></label><input id="riemannN" type="range" min="2" max="80" value="8" step="1"></div><div id="riemannStatus" class="status good"></div><span class="pill">函数 f(x)=x²，区间 [0,1]</span></div></div></div>
+ <p>当 n 增大时，每个小区间的宽度 Δx=1/n 变小，长方形顶端与曲线之间的空隙也逐渐缩小。</p>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第三章 · 积分</div><div class="kicker">第二节 · 定积分的定义</div>
+ <h2>把“无限细以后再相加”写成极限</h2>
+ <div class="definition"><p>把 [a,b] 分成许多小区间，宽度记作 Δxᵢ，在第 i 段选一点 xᵢ*。若和式的极限存在，就定义：</p><div class="formula">∫<sub>a</sub><sup>b</sup> f(x)dx = lim Σ f(xᵢ*)Δxᵢ</div></div>
+ <div class="strip"><div class="mini"><b>f(xᵢ*)</b><p>第 i 个小块的近似高度。</p></div><div class="mini"><b>Δxᵢ</b><p>第 i 个小块的宽度。</p></div><div class="mini"><b>Σ 与极限</b><p>先把小块相加，再让最宽的小块也趋近 0。</p></div></div>
+ <p class="history">积分符号 ∫ 是拉长的字母 S，来自“求和”一词。它提醒我们：积分本质上是连续的加法。</p>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第三章 · 积分</div><div class="kicker">积分不是简单的几何面积</div>
+ <h2>x 轴上方为正，下方为负</h2>
+ <div class="art"><svg viewBox="0 0 900 440" role="img" aria-label="定积分的正负面积"><rect width="900" height="440" fill="#faf7f0"/><path d="M65 225H835M120 400V45" stroke="#777168" stroke-width="2"/><path d="M100 300C210 60 345 70 445 225S660 405 810 120" fill="none" stroke="#397ea3" stroke-width="7"/><path d="M145 225C230 80 350 95 445 225Z" fill="#558a6844"/><path d="M445 225C550 370 660 380 750 225Z" fill="#d85d4b44"/><text x="255" y="145" font-size="23" fill="#39734f">正贡献</text><text x="550" y="330" font-size="23" fill="#a2473a">负贡献</text></svg></div>
+ <div class="formula">∫ f(x)dx = 上方面积 − 下方面积</div>
+ <p>如果题目要求普通几何面积，下方部分也必须取正值再相加。</p>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第三章 · 积分</div><div class="kicker">第三节 · 不定积分</div>
+ <h2>如果知道变化率，能找回原函数吗？</h2>
+ <p>求导把函数变成变化率。现在反过来问：</p><div class="formula">谁的导数是 2x？</div>
+ <div class="spread"><div><div class="formula">(x²)′=2x</div></div><div><div class="formula">(x²+7)′=2x</div></div></div>
+ <p>常数求导后都会消失，因此答案不止一个。</p>
+ <div class="definition"><p>若 F′(x)=f(x)，就称 F 是 f 的一个原函数。所有原函数写作：</p><div class="formula">∫f(x)dx=F(x)+C</div></div>
+ <p class="note">不定积分末尾的 +C 不是装饰，它代表求导过程中丢失的任意常数。</p>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第三章 · 积分</div><div class="kicker">第四节 · 微积分基本定理</div>
+ <h2>面积问题，为什么最后变成了找原函数？</h2>
+ <p>定义累积面积函数：</p><div class="formula">A(x)=∫<sub>a</sub><sup>x</sup>f(t)dt</div>
+ <p>把右端点从 x 增加到 x+h，新增加的是一条很窄的面积：</p>
+ <div class="art"><svg viewBox="0 0 900 390" role="img" aria-label="累积面积增加一条窄带"><rect width="900" height="390" fill="#faf7f0"/><path d="M65 330H835M110 365V35" stroke="#777168" stroke-width="2"/><path d="M110 320C280 300 470 210 790 65" fill="none" stroke="#397ea3" stroke-width="7"/><path d="M110 320C280 300 470 210 650 130L650 330H110Z" fill="#397ea322"/><path d="M650 130C670 120 690 110 710 100L710 330H650Z" fill="#d85d4b55"/><text x="300" y="280" font-size="24" fill="#397ea3">A(x)</text><text x="650" y="78" font-size="22" fill="#d85d4b">新增面积</text></svg></div>
+ <p>当 h 很小时，新增面积约为 f(x)h，所以面积的瞬时变化率就是 f(x)：</p>
+ <div class="definition"><div class="formula">A′(x)=f(x)</div><p>求导与积分在这里成为互逆过程。</p></div>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第三章 · 积分</div><div class="kicker">基本定理的计算形式</div>
+ <h2>找到一个原函数，就能计算定积分</h2>
+ <div class="definition"><p>若 F′(x)=f(x)，那么：</p><div class="formula">∫<sub>a</sub><sup>b</sup>f(x)dx=F(b)−F(a)</div></div>
+ <p>例如：</p>
+ <div class="checklist"><div>① 求原函数：∫x²dx=x³/3+C</div><div>② 代入上限：F(1)=1/3</div><div>③ 减去下限：F(0)=0</div></div>
+ <div class="formula">∫<sub>0</sub><sup>1</sup>x²dx=1/3</div>
+ <p class="quote">黎曼和告诉我们积分是什么；基本定理告诉我们怎样高效地算。</p>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第三章 · 积分</div><div class="kicker">第五节 · 基本积分与换元</div>
+ <h2>积分法则，是求导法则倒过来使用</h2>
+ <div class="strip"><div class="mini"><b>幂函数</b><div class="formula">∫xⁿdx=<span class="frac"><span>xⁿ⁺¹</span><span>n+1</span></span>+C</div><p class="note">n≠−1</p></div><div class="mini"><b>指数函数</b><div class="formula">∫eˣdx=eˣ+C</div></div><div class="mini"><b>倒数</b><div class="formula">∫1/x dx=ln|x|+C</div></div></div>
+ <h3>换元法：链式法则倒着用</h3>
+ <div class="formula">∫2x·cos(x²)dx</div>
+ <div class="flow"><div class="box">令 u=x²</div><div class="arrow">→</div><div class="box">du=2x dx</div><div class="arrow">→</div><div class="box">∫cos u du=sin u+C</div></div>
+ <div class="formula">答案：sin(x²)+C</div>
+ <div class="folio"></div>
+</section>
+
+<section class="page">
+ <div class="running">第三章 · 积分</div><div class="kicker">第六节 · 积分描述累积</div>
+ <h2>速度累积成路程，流量累积成总量</h2>
+ <div class="spread"><div><h3>已知速度 v(t)</h3><div class="formula">位移=∫<sub>t₁</sub><sup>t₂</sup>v(t)dt</div><p>每个极短时间内的位移约为 v(t)dt，把它们加起来得到总位移。</p></div><div><h3>已知密度 ρ(x)</h3><div class="formula">总质量=∫ρ(x)dx</div><p>每个极短区间内的质量约为 ρ(x)dx，把它们加起来得到总质量。</p></div></div>
+ <p class="quote">积分不只是在算面积。面积只是“局部量 × 小宽度再累加”的第一幅图。</p>
+ <div class="exercise"><div class="eyebrow">在线练习</div><h3>若速度始终为 v(t)=3t²，那么从 t=0 到 t=2 的位移是多少？</h3><button class="choice" data-ok="0" data-explain="6 是终点时刻的速度 v(2)，不是这段时间的累积位移。">A. 6</button><button class="choice" data-ok="1" data-explain="正确。∫₀²3t²dt=[t³]₀²=8。">B. 8</button><button class="choice" data-ok="0" data-explain="12 相当于用终点速度乘时间，但速度并不是恒定的。">C. 12</button><div class="feedback">位移是速度关于时间的定积分。</div></div>
+ <div class="folio"></div>
+</section>
+
+<section class="page" id="book-summary">
+ <div class="running">第一编 · 小结</div><div class="kicker">一条主线，两种局部操作</div>
+ <h2>微积分研究的是变化，以及变化怎样累积</h2>
+ <div class="summary-grid"><div class="summary-card"><h3>函数</h3><p>用输入和输出描述两个量之间的关系。</p></div><div class="summary-card"><h3>极限</h3><p>研究输入不断靠近时，输出呈现的趋势。</p></div><div class="summary-card"><h3>导数</h3><p>把观察区间压到一个点，得到瞬时变化率。</p></div><div class="summary-card"><h3>积分</h3><p>把无数个微小贡献相加，得到总累积量。</p></div></div>
+ <div class="flow"><div class="box">原函数 F</div><div class="arrow">求导 →</div><div class="box">变化率 f</div><div class="arrow">← 积分</div></div>
+ <p class="quote">导数把整体拆到局部；积分把局部重新拼成整体。微积分基本定理说明，这两个方向彼此相连。</p>
+ <div class="folio"></div>
+</section>
+
+<section class="page end">
+ <div class="kicker">第一编结束</div><h2>函数、极限、导数与积分</h2>
+ <p class="lead" style="margin-inline:auto">从“一个量怎样跟着另一个量变化”，走到“变化率怎样累积成整体”。</p>
+ <div class="formula accent">看见变化，也看见变化背后的结构。</div><div class="folio"></div>
+</section>
+</main>
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+function fitCanvas(c){const r=c.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);if(c.width!==Math.round(r.width*d)||c.height!==Math.round(r.height*d)){c.width=Math.round(r.width*d);c.height=Math.round(r.height*d)}return {g:c.getContext('2d'),w:c.width,h:c.height,d}}
+const graphX=$('#graphX'),graphCanvas=$('#graphCanvas');
+function drawGraph(){
+ const {g,w,h,d}=fitCanvas(graphCanvas),v=+graphX.value,p=42*d,X=x=>p+(x+3)/6*(w-2*p),Y=y=>h-p-(y/7)*(h-2*p);
+ g.clearRect(0,0,w,h);g.strokeStyle='#aaa095';g.lineWidth=d;g.beginPath();g.moveTo(p,Y(0));g.lineTo(w-p,Y(0));g.moveTo(X(0),p);g.lineTo(X(0),h-p);g.stroke();
+ g.strokeStyle='#397ea3';g.lineWidth=4*d;g.beginPath();for(let i=0;i<=240;i++){const x=-2.6+i/240*5.2,y=x*x;i?g.lineTo(X(x),Y(y)):g.moveTo(X(x),Y(y))}g.stroke();
+ const px=X(v),py=Y(v*v);g.strokeStyle='#d85d4b';g.lineWidth=1.5*d;g.setLineDash([7*d,6*d]);g.beginPath();g.moveTo(px,Y(0));g.lineTo(px,py);g.lineTo(X(0),py);g.stroke();g.setLineDash([]);g.fillStyle='#d85d4b';g.beginPath();g.arc(px,py,7*d,0,Math.PI*2);g.fill();
+ $('#graphXOut').value=v.toFixed(2);$('#graphStatus').textContent=`点 (${v.toFixed(2)}, ${(v*v).toFixed(2)}) 表示 f(${v.toFixed(2)})=${(v*v).toFixed(2)}`;
+}
+graphX.addEventListener('input',drawGraph);
+const shiftH=$('#shiftH'),shiftK=$('#shiftK'),shiftCanvas=$('#shiftCanvas');
+function drawShift(){
+ const {g,w,h,d}=fitCanvas(shiftCanvas),a=+shiftH.value,k=+shiftK.value,p=40*d,X=x=>p+(x+4)/8*(w-2*p),Y=y=>h-p-((y+2.5)/9.5)*(h-2*p);
+ g.clearRect(0,0,w,h);g.strokeStyle='#aaa095';g.lineWidth=d;g.beginPath();g.moveTo(p,Y(0));g.lineTo(w-p,Y(0));g.moveTo(X(0),p);g.lineTo(X(0),h-p);g.stroke();
+ const curve=(color,fn)=>{g.strokeStyle=color;g.lineWidth=4*d;g.beginPath();for(let i=0;i<=240;i++){const x=-3.2+i/240*6.4,y=fn(x);i?g.lineTo(X(x),Y(y)):g.moveTo(X(x),Y(y))}g.stroke()};curve('#aaa095',x=>x*x);curve('#397ea3',x=>(x-a)*(x-a)+k);
+ g.fillStyle='#d85d4b';g.beginPath();g.arc(X(a),Y(k),7*d,0,Math.PI*2);g.fill();g.font=12*d+'px system-ui';g.fillStyle='#777168';g.fillText('灰色：y=f(x)',p,p);g.fillStyle='#397ea3';g.fillText('蓝色：y=f(x−h)+k',p,p+18*d);
+ $('#shiftHOut').value=a.toFixed(1);$('#shiftKOut').value=k.toFixed(1);
+}
+shiftH.addEventListener('input',drawShift);shiftK.addEventListener('input',drawShift);
+const eps=$('#eps'), nCut=$('#nCut'), seqCanvas=$('#seqCanvas');
+function drawSeq(){
+ const {g,w,h,d}=fitCanvas(seqCanvas),e=+eps.value,N=+nCut.value;
+ g.clearRect(0,0,w,h); const pad=50*d, x=n=>pad+(n-1)/(40-1)*(w-2*pad), y=v=>h*.72-v*h*.55;
+ g.fillStyle='#d85d4b22';g.fillRect(pad,y(e),w-2*pad,y(-e)-y(e));
+ g.strokeStyle='#d85d4b';g.lineWidth=2*d;g.setLineDash([8*d,7*d]);g.beginPath();g.moveTo(pad,y(0));g.lineTo(w-pad,y(0));g.stroke();g.setLineDash([]);
+ g.strokeStyle='#292824';g.lineWidth=2*d;g.beginPath();g.moveTo(x(N),pad*.55);g.lineTo(x(N),h-pad*.55);g.stroke();
+ g.font=12*d+'px system-ui';g.fillStyle='#292824';g.fillText('N='+N,x(N)+6*d,pad*.7);
+ for(let n=1;n<=40;n++){const inside=1/n<e;g.fillStyle=n>N?(inside?'#558a68':'#d85d4b'):'#397ea3';g.beginPath();g.arc(x(n),y(1/n),n>N?5*d:3.5*d,0,Math.PI*2);g.fill()}
+ g.fillStyle='#777168';g.fillText('n →',w-pad-20*d,h-16*d);g.fillStyle='#d85d4b';g.fillText('L=0',8*d,y(0)+4*d);
+ $('#epsOut').value=e.toFixed(2);$('#nOut').value=N;
+ const ok=N>=Math.floor(1/e), s=$('#seqStatus');s.className='status '+(ok?'good':'bad');s.textContent=ok?'N 满足要求 ✓':'N 太小，后面仍有项超出 ε 范围';
+}
+eps.addEventListener('input',drawSeq);nCut.addEventListener('input',drawSeq);
+$('#findN').addEventListener('click',()=>{nCut.value=Math.min(40,Math.floor(1/+eps.value));drawSeq()});
+const feps=$('#feps'),delta=$('#delta'),fnCanvas=$('#fnCanvas');
+function drawFn(){
+ const {g,w,h,d}=fitCanvas(fnCanvas),e=+feps.value,dt=+delta.value,p=42*d;
+ const X=x=>p+(x+0.2)/2.4*(w-2*p),Y=y=>h-p-((y-.5)/3)*(h-2*p);
+ g.clearRect(0,0,w,h);g.fillStyle='#d85d4b22';g.fillRect(p,Y(2+e),w-2*p,Y(2-e)-Y(2+e));g.fillStyle='#397ea322';g.fillRect(X(1-dt),p,X(1+dt)-X(1-dt),h-2*p);
+ g.strokeStyle='#aaa095';g.lineWidth=d;g.beginPath();g.moveTo(p,Y(.5));g.lineTo(w-p,Y(.5));g.stroke();
+ g.strokeStyle='#397ea3';g.lineWidth=4*d;g.beginPath();for(let i=0;i<=240;i++){let x=-.2+i/240*2.4,y=x+1;i?g.lineTo(X(x),Y(y)):g.moveTo(X(x),Y(y))}g.stroke();
+ g.fillStyle='#fffdf8';g.strokeStyle='#397ea3';g.lineWidth=3*d;g.beginPath();g.arc(X(1),Y(2),7*d,0,Math.PI*2);g.fill();g.stroke();
+ g.strokeStyle='#d85d4b';g.lineWidth=1.5*d;g.setLineDash([7*d,6*d]);g.beginPath();g.moveTo(p,Y(2));g.lineTo(w-p,Y(2));g.moveTo(X(1),p);g.lineTo(X(1),h-p);g.stroke();g.setLineDash([]);
+ g.font=12*d+'px system-ui';g.fillStyle='#777168';g.fillText('x',w-p,h-10*d);g.fillStyle='#d85d4b';g.fillText('L=2',8*d,Y(2)+4*d);g.fillText('a=1',X(1)-12*d,h-10*d);
+ $('#fepsOut').value=e.toFixed(2);$('#deltaOut').value=dt.toFixed(2);
+ const ok=dt<=e,s=$('#fnStatus');s.className='status '+(ok?'good':'bad');s.textContent=ok?'δ≤ε，满足要求 ✓':'δ>ε，蓝色范围内会有函数值越出红色范围';
+}
+feps.addEventListener('input',drawFn);delta.addEventListener('input',drawFn);
+$('#safeDelta').addEventListener('click',()=>{delta.value=Math.max(.02,Math.min(.70,+feps.value)).toFixed(2);drawFn()});
+const tangentH=$('#tangentH'),tangentCanvas=$('#tangentCanvas');
+function drawTangent(){
+ const {g,w,h,d}=fitCanvas(tangentCanvas),dt=+tangentH.value,p=42*d,X=x=>p+(x+1)/4.2*(w-2*p),Y=y=>h-p-((y+1)/10)*(h-2*p),a=1,m=2+dt,atZero=Math.abs(dt)<1e-9;
+ g.clearRect(0,0,w,h);g.strokeStyle='#aaa095';g.lineWidth=d;g.beginPath();g.moveTo(p,Y(0));g.lineTo(w-p,Y(0));g.moveTo(X(0),p);g.lineTo(X(0),h-p);g.stroke();
+ g.strokeStyle='#397ea3';g.lineWidth=4*d;g.beginPath();for(let i=0;i<=260;i++){const x=-1+i/260*4.2,y=x*x;i?g.lineTo(X(x),Y(y)):g.moveTo(X(x),Y(y))}g.stroke();
+ const line=(color,slope)=>{g.strokeStyle=color;g.lineWidth=3*d;g.beginPath();g.moveTo(X(-.4),Y(1+slope*(-1.4)));g.lineTo(X(3),Y(1+slope*2));g.stroke()};line('#d2a33f',2);if(!atZero)line('#d85d4b',m);
+ g.fillStyle='#d85d4b';for(const x of (atZero?[a]:[a,a+dt])){g.beginPath();g.arc(X(x),Y(x*x),7*d,0,Math.PI*2);g.fill()}
+ $('#tangentHOut').value=dt.toFixed(2);const s=$('#tangentStatus');s.className='status '+(Math.abs(dt)<.25?'good':'');s.textContent=atZero?'h=0 时两点重合，割线不再定义；黄色切线表示极限位置。':`割线斜率 = 2+h = ${m.toFixed(2)}；目标切线斜率 = 2`;
+}
+tangentH.addEventListener('input',drawTangent);
+const riemannN=$('#riemannN'),riemannCanvas=$('#riemannCanvas');
+function drawRiemann(){
+ const {g,w,h,d}=fitCanvas(riemannCanvas),n=+riemannN.value,p=45*d,X=x=>p+x*(w-2*p),Y=y=>h-p-y*(h-2*p)*.9;
+ g.clearRect(0,0,w,h);const dx=1/n;g.fillStyle='#d85d4b33';g.strokeStyle='#d85d4b';g.lineWidth=Math.max(.5*d,d*1.2);
+ for(let i=1;i<=n;i++){const x=i*dx,y=x*x;g.fillRect(X((i-1)*dx),Y(y),X(i*dx)-X((i-1)*dx),Y(0)-Y(y));g.strokeRect(X((i-1)*dx),Y(y),X(i*dx)-X((i-1)*dx),Y(0)-Y(y))}
+ g.strokeStyle='#aaa095';g.lineWidth=d;g.beginPath();g.moveTo(p,Y(0));g.lineTo(w-p,Y(0));g.moveTo(X(0),p);g.lineTo(X(0),h-p);g.stroke();g.strokeStyle='#397ea3';g.lineWidth=4*d;g.beginPath();for(let i=0;i<=240;i++){const x=i/240,y=x*x;i?g.lineTo(X(x),Y(y)):g.moveTo(X(x),Y(y))}g.stroke();
+ const sum=(n+1)*(2*n+1)/(6*n*n);$('#riemannNOut').value=n;$('#riemannStatus').textContent=`右端点和 ≈ ${sum.toFixed(4)}；真正面积 = 1/3 ≈ 0.3333`;
+}
+riemannN.addEventListener('input',drawRiemann);
+$$('.choice').forEach(b=>b.addEventListener('click',()=>{const ok=b.dataset.ok==='1';b.parentElement.querySelectorAll('.choice').forEach(x=>x.classList.remove('correct','wrong'));b.classList.add(ok?'correct':'wrong');const f=b.parentElement.querySelector('.feedback');if(f)f.textContent=b.dataset.explain||(ok?'正确。':'再检查一次条件和结论之间的关系。')}));
+function updateScroll(){const y=scrollY,doc=document.documentElement;$('#progress').style.width=(y/(doc.scrollHeight-innerHeight)*100)+'%';const ids=['cover','functions','sequence','derivative','integral','book-summary'];let now=ids[0];ids.forEach(id=>{const e=$('#'+id);if(e&&e.offsetTop<y+innerHeight*.45)now=id});$$('.rail a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+now))}
+function drawAll(){drawGraph();drawShift();drawSeq();drawFn();drawTangent();drawRiemann()}
+addEventListener('scroll',updateScroll,{passive:true});addEventListener('resize',drawAll);drawAll();updateScroll();
+</script>
+</body>
+</html>
